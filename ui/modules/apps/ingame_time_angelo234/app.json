@@ -1,0 +1,9 @@
+{
+  "name" : "In-Game Time",
+  "author": "angelo234",
+  "version": "1.0",
+  "description": "Displays the in-game time.",
+  "directive": "ingameTimeAngelo234",
+  "domElement": "<ingame-time-angelo234></ingame-time-angelo234>",
+  "css": { "width": "220px", "height": "110px", "top": "100px", "left": "100px"}
+}
