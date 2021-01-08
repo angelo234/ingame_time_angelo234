@@ -4,13 +4,32 @@ return {
 templateUrl: 'modules/apps/ingame_time_angelo234/app.html',
 replace: true,
 restrict: 'EA',
-link: function (scope, element, attrs) {
+require: '^bngApp',
+link: function (scope, element, attrs, ctrl) {
 	
 	// The current overlay screen the user is on (default: null)
 	scope.overlayScreen = null;	
 
 	scope.displayrealtime = false;
 	scope.ampmstyle = false;
+
+	element.ready(function () {
+	ctrl.getSettings()
+	  .then(function (settings) {
+	    app_settings = settings;
+
+	    if(app_settings == null){
+	    	app_settings = {};
+	    	app_settings.displayrealtime = false;
+	    	app_settings.ampmstyle = false;
+	    }
+	    else{
+	    	scope.displayrealtime = app_settings.displayrealtime;
+			scope.ampmstyle = app_settings.ampmstyle;
+	    }   
+	  })
+	});
+
 
 	var streamsList = ['electrics'];
 	StreamsManager.add(streamsList);
@@ -104,6 +123,10 @@ link: function (scope, element, attrs) {
 	// Make sure we clean up after closing the app.
 	scope.$on('$destroy', function () {
 		StreamsManager.remove(streamsList);
+		app_settings.displayrealtime = scope.displayrealtime;
+		app_settings.ampmstyle = scope.ampmstyle;
+		
+		ctrl.saveSettings(app_settings);
 	});	
 },
 };
