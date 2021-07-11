@@ -1,11 +1,13 @@
 angular.module('beamng.apps')
-.directive('ingameTimeAngelo234', ['bngApi', 'StreamsManager', 'UiUnits', function (bngApi, StreamsManager, UiUnits) {
+.directive('ingameTimeAngelo234', [function () {
 return {
-templateUrl: 'modules/apps/ingame_time_angelo234/app.html',
+templateUrl: '/ui/modules/apps/ingame_time_angelo234/app.html',
 replace: true,
 restrict: 'EA',
 require: '^bngApp',
 link: function (scope, element, attrs, ctrl) {
+	
+	var settings_file_path = "settings/ingame_time_angelo234/settings.json";
 	
 	// The current overlay screen the user is on (default: null)
 	scope.overlayScreen = null;	
@@ -13,23 +15,14 @@ link: function (scope, element, attrs, ctrl) {
 	scope.displayrealtime = false;
 	scope.ampmstyle = false;
 
-	element.ready(function () {
-	ctrl.getSettings()
-	  .then(function (settings) {
-	    app_settings = settings;
-
-	    if(app_settings == null){
-	    	app_settings = {};
-	    	app_settings.displayrealtime = false;
-	    	app_settings.ampmstyle = false;
-	    }
-	    else{
-	    	scope.displayrealtime = app_settings.displayrealtime;
-			scope.ampmstyle = app_settings.ampmstyle;
-	    }   
-	  })
+	element.ready(function () {	
+		bngApi.engineLua("jsonReadFile('" + settings_file_path + "')", function(data) {
+			if(data !== undefined){
+				scope.displayrealtime = data.displayrealtime;
+				scope.ampmstyle = data.ampmstyle;
+			}
+		});		
 	});
-
 
 	var streamsList = ['electrics'];
 	StreamsManager.add(streamsList);
@@ -123,10 +116,14 @@ link: function (scope, element, attrs, ctrl) {
 	// Make sure we clean up after closing the app.
 	scope.$on('$destroy', function () {
 		StreamsManager.remove(streamsList);
-		app_settings.displayrealtime = scope.displayrealtime;
-		app_settings.ampmstyle = scope.ampmstyle;
 		
-		ctrl.saveSettings(app_settings);
+		var data = {}
+		data.displayrealtime = scope.displayrealtime;
+		data.ampmstyle = scope.ampmstyle;
+		
+		data = JSON.stringify(data);
+		
+		bngApi.engineLua("writeFile('" + settings_file_path + "'," + "'" + data + "', true)");
 	});	
 },
 };
